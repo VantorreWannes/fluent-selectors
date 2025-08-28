@@ -88,16 +88,16 @@ wheels = [
 
 [[package]]
 name = "fluent-checks"
-version = "0.1.1"
+version = "0.1.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a4/f1/65b3cb17d6a86358477c2f093bc0a6916fbb79b3ab9da195777f6ebdc3b1/fluent_checks-0.1.1.tar.gz", hash = "sha256:e50098976d46d25568a06e644f6bf0b81286f4c71eec3e465fac6c1a9e79b7fe", size = 3791, upload-time = "2025-08-28T09:10:34.826Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/51/39/d57c77d2570d89527a53818401c25261025851a9f23eb90bf87d2b2996c4/fluent_checks-0.1.3.tar.gz", hash = "sha256:da66b9f1f7832551b977e553d609f9fd6adab94e103f85523c8205bb2d35ebb2", size = 3942, upload-time = "2025-08-28T14:28:34.23Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/26/14/f21587e9aaa30204d0629b5de498b11d8edd992c84273611a78319b76c36/fluent_checks-0.1.1-py3-none-any.whl", hash = "sha256:e73c9eb5c394a24549b11af0abea3030c01eb462cfd9f4b807bc9d53d26f42c9", size = 4429, upload-time = "2025-08-28T09:10:33.805Z" },
+    { url = "https://files.pythonhosted.org/packages/62/83/11ae821fabc39836f52cb409de35a68161b95d2727a989cdeecd50669c91/fluent_checks-0.1.3-py3-none-any.whl", hash = "sha256:8cc76e84e3db0b9f8045ce2032d0cbcd8c12bb6f15606104246323a2ce096fd9", size = 4622, upload-time = "2025-08-28T14:28:32.961Z" },
 ]
 
 [[package]]
 name = "fluent-selectors"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "." }
 dependencies = [
     { name = "fluent-checks" },
@@ -113,7 +113,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fluent-checks", specifier = ">=0.1.1" },
+    { name = "fluent-checks", specifier = "==0.1.3" },
     { name = "selenium", specifier = ">=4.35.0" },
 ]
 
