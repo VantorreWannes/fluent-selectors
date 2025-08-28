@@ -174,6 +174,9 @@ class Selector(ABC):
     def has_attribute(self, name: str) -> "HasAttributeCheck":
         return HasAttributeCheck(self, name)
 
+    def has_attribute_value(self, name: str, value: str) -> "HasAttributeValueCheck":
+        return HasAttributeValueCheck(self, name, value)
+
 
 class IsPresentCheck(Check):
     def __init__(self, selector: Selector) -> None:
@@ -226,5 +229,15 @@ class HasAttributeCheck(Check):
             return selector._driver.execute_script(HAS_ATTRIBUTE_SCRIPT, element, name)
 
         super().__init__(check_attribute_with_js)
+        self._selector: Selector = selector
+        self._name = name
+
+
+class HasAttributeValueCheck(Check):
+    def __init__(self, selector: Selector, name: str, value: str) -> None:
+        super().__init__(
+            lambda: (e := selector.element) is not None
+            and value == e.get_attribute(name)
+        )
         self._selector: Selector = selector
         self._name = name
