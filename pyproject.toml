@@ -1,11 +1,14 @@
 [project]
 name = "fluent-selectors"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Python library for creating a readable, fluent API for Selenium browser automation"
 readme = "README.md"
 authors = [{ name = "vantorrewannes", email = "vantorrewannes@gmail.com" }]
 requires-python = ">=3.12"
-dependencies = ["fluent-checks>=0.1.1", "selenium>=4.35.0"]
+dependencies = [
+ "fluent-checks>=0.1.2",
+ "selenium>=4.35.0",
+]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
