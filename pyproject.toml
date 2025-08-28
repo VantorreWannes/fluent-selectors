@@ -5,21 +5,31 @@ description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "vantorrewannes", email = "vantorrewannes@gmail.com" }]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "fluent-checks>=0.1.1",
+    "selenium>=4.35.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.8.13,<0.9.0"]
 build-backend = "uv_build"
 
-[tool.ruff.lint]
-select = ["E4", "E7", "E9", "F"]
-ignore = []
+[tool.pytest.ini_options]
+pythonpath = "."
+testpaths = "tests"
 
+[tool.ruff.lint]
+select = ["E", "F", "I"]
 fixable = ["ALL"]
-unfixable = []
 
 [[tool.uv.index]]
 name = "testpypi"
 url = "https://test.pypi.org/simple/"
 publish-url = "https://test.pypi.org/legacy/"
 explicit = true
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "webdriver-manager>=4.0.2",
+]
