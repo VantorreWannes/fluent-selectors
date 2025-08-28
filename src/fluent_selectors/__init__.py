@@ -15,6 +15,7 @@ type Locator = tuple[str, str]
 
 SELF_LOCATOR: Locator = (By.XPATH, ".")
 CHILDREN_LOCATOR: Locator = (By.XPATH, "./*")
+HAS_ATTRIBUTE_SCRIPT = "return arguments[0].hasAttribute(arguments[1]);"
 
 
 @dataclass
@@ -218,9 +219,12 @@ class HasExactTextCheck(Check):
 
 class HasAttributeCheck(Check):
     def __init__(self, selector: Selector, name: str) -> None:
-        super().__init__(
-            lambda: (e := selector.element) is not None
-            and e.get_attribute(name) is not None
-        )
+        def check_attribute_with_js():
+            element = selector.element
+            if element is None:
+                return False
+            return selector._driver.execute_script(HAS_ATTRIBUTE_SCRIPT, element, name)
+
+        super().__init__(check_attribute_with_js)
         self._selector: Selector = selector
         self._name = name

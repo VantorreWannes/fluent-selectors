@@ -150,4 +150,3 @@ def test_children(chrome_driver: WebDriver, test_page_url: str):
     assert child_selectors[1].tag_name == "p"
     assert child_selectors[2].tag_name == "button"
     assert child_selectors[3].tag_name == "button"
-
