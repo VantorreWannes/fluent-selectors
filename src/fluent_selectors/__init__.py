@@ -1,6 +1,8 @@
+import os
 from abc import ABC
 from dataclasses import dataclass
 from functools import cached_property
+from pathlib import Path
 from typing import Optional, Union
 
 from fluent_checks import Check
@@ -82,6 +84,25 @@ class Selector(ABC):
         num_children = len(self.select(CHILDREN_LOCATOR).elements)
         return [self.child(index) for index in range(num_children)]
 
+    def click(self):
+        if element := self.element:
+            element.click()
+
+    def type_text(self, text: str):
+        if element := self.element:
+            element.send_keys(text)
+
+    def clear(self):
+        if element := self.element:
+            element.clear()
+
+    def set_text(self, text: str):
+        self.clear()
+        self.type_text(text)
+
+    def upload_file(self, path: Path):
+        self.set_text(os.path.abspath(path))
+
     @property
     def text(self) -> Optional[str]:
         if element := self.element:
@@ -122,6 +143,10 @@ class Selector(ABC):
     def scroll_into_view(self) -> None:
         if element := self.element:
             self._driver.execute_script("arguments[0].scrollIntoView(true);", element)
+
+    def attribute(self, name: str) -> Optional[str]:
+        if element := self.element:
+            return element.get_attribute(name)
 
     @property
     def is_present(self) -> "IsPresentCheck":
@@ -207,5 +232,3 @@ class HasAttributeCheck(Check):
         )
         self._selector: Selector = selector
         self._name = name
-
-
