@@ -176,59 +176,51 @@ class Selector(ABC):
 
 class IsPresentCheck(Check):
     def __init__(self, selector: Selector) -> None:
-        element: WebElement | None = selector.element
-        super().__init__(lambda: True if element is not None else False)
+        super().__init__(lambda: selector.element is not None)
         self._selector: Selector = selector
 
 
 class IsDisplayedCheck(Check):
     def __init__(self, selector: Selector) -> None:
-        element: WebElement | None = selector.element
         super().__init__(
-            lambda: element.is_displayed() if element is not None else False
+            lambda: (e := selector.element) is not None and e.is_displayed()
         )
         self._selector: Selector = selector
 
 
 class IsEnabledCheck(Check):
     def __init__(self, selector: Selector) -> None:
-        element: WebElement | None = selector.element
-        super().__init__(lambda: element.is_enabled() if element is not None else False)
+        super().__init__(lambda: (e := selector.element) is not None and e.is_enabled())
         self._selector: Selector = selector
 
 
 class IsSelectedCheck(Check):
     def __init__(self, selector: Selector) -> None:
-        element: WebElement | None = selector.element
         super().__init__(
-            lambda: element.is_selected() if element is not None else False
+            lambda: (e := selector.element) is not None and e.is_selected()
         )
         self._selector: Selector = selector
 
 
 class HasTextCheck(Check):
     def __init__(self, selector: Selector, text: str) -> None:
-        element: WebElement | None = selector.element
-        super().__init__(lambda: text in element.text if element is not None else False)
+        super().__init__(lambda: (e := selector.element) is not None and text in e.text)
         self._selector: Selector = selector
         self._text: str = text
 
 
 class HasExactTextCheck(Check):
     def __init__(self, selector: Selector, text: str) -> None:
-        element: WebElement | None = selector.element
-        super().__init__(lambda: text == element.text if element is not None else False)
+        super().__init__(lambda: (e := selector.element) is not None and text == e.text)
         self._selector: Selector = selector
         self._text: str = text
 
 
 class HasAttributeCheck(Check):
     def __init__(self, selector: Selector, name: str) -> None:
-        element: WebElement | None = selector.element
         super().__init__(
-            lambda: bool(element.get_attribute(self._name))
-            if element is not None
-            else False
+            lambda: (e := selector.element) is not None
+            and e.get_attribute(name) is not None
         )
         self._selector: Selector = selector
         self._name = name
