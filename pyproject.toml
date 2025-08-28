@@ -1,0 +1,25 @@
+[project]
+name = "fluent-selectors"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [{ name = "vantorrewannes", email = "vantorrewannes@gmail.com" }]
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.8.13,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+
+fixable = ["ALL"]
+unfixable = []
+
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
