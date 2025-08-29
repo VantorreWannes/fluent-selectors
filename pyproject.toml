@@ -1,6 +1,6 @@
 [project]
 name = "fluent-selectors"
-version = "0.1.4"
+version = "0.1.5"
 description = "A Python library for creating a readable, fluent API for Selenium browser automation"
 readme = "README.md"
 authors = [{ name = "vantorrewannes", email = "vantorrewannes@gmail.com" }]

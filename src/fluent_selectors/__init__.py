@@ -13,9 +13,9 @@ from selenium.webdriver.remote.webelement import WebElement
 
 type Locator = tuple[str, str]
 
-SELF_LOCATOR: Locator = (By.XPATH, ".")
-CHILDREN_LOCATOR: Locator = (By.XPATH, "./*")
-HAS_ATTRIBUTE_SCRIPT = "return arguments[0].hasAttribute(arguments[1]);"
+__SELF_LOCATOR: Locator = (By.XPATH, ".")
+__CHILDREN_LOCATOR: Locator = (By.XPATH, "./*")
+__HAS_ATTRIBUTE_SCRIPT = "return arguments[0].hasAttribute(arguments[1]);"
 
 
 @dataclass
@@ -33,14 +33,14 @@ class Size:
 class Selector(ABC):
     def __init__(self, driver: WebDriver, *locators: Locator) -> None:
         super().__init__()
-        self._driver: WebDriver = driver
-        self._locators: tuple[Locator, ...] = locators or (SELF_LOCATOR,)
-        self._locator: Locator = self._locators[-1]
+        self.driver: WebDriver = driver
+        self.locators: tuple[Locator, ...] = locators or (__SELF_LOCATOR,)
+        self._locator: Locator = self.locators[-1]
 
     @cached_property
     def parent(self) -> Optional["Selector"]:
-        if len(self._locators) > 1:
-            return Selector(self._driver, *self._locators[:-1])
+        if len(self.locators) > 1:
+            return Selector(self.driver, *self.locators[:-1])
 
     @cached_property
     def parents(self) -> list["Selector"]:
@@ -52,7 +52,7 @@ class Selector(ABC):
     def _context(self) -> Union[WebDriver, WebElement, None]:
         if self.parent:
             return self.parent.element
-        return self._driver
+        return self.driver
 
     @property
     def element(self) -> Optional[WebElement]:
@@ -75,33 +75,33 @@ class Selector(ABC):
             return []
 
     def select(self, locator: Locator) -> "Selector":
-        return Selector(self._driver, *self._locators, locator)
+        return Selector(self.driver, *self.locators, locator)
 
     def child(self, index: int) -> "Selector":
-        locator: Locator = (By.XPATH, f"({CHILDREN_LOCATOR[1]})[{index + 1}]")
-        return Selector(self._driver, *self._locators, locator)
+        locator: Locator = (By.XPATH, f"({__CHILDREN_LOCATOR[1]})[{index + 1}]")
+        return Selector(self.driver, *self.locators, locator)
 
     def children(self) -> list["Selector"]:
-        num_children = len(self.select(CHILDREN_LOCATOR).elements)
+        num_children = len(self.select(__CHILDREN_LOCATOR).elements)
         return [self.child(index) for index in range(num_children)]
 
-    def click(self):
+    def click(self) -> None:
         if element := self.element:
             element.click()
 
-    def type_text(self, text: str):
+    def type_text(self, text: str) -> None:
         if element := self.element:
             element.send_keys(text)
 
-    def clear(self):
+    def clear(self) -> None:
         if element := self.element:
             element.clear()
 
-    def set_text(self, text: str):
+    def set_text(self, text: str) -> None:
         self.clear()
         self.type_text(text)
 
-    def upload_file(self, path: Path):
+    def upload_file(self, path: Path) -> None:
         self.set_text(os.path.abspath(path))
 
     @property
@@ -143,7 +143,7 @@ class Selector(ABC):
 
     def scroll_into_view(self) -> None:
         if element := self.element:
-            self._driver.execute_script("arguments[0].scrollIntoView(true);", element)
+            self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
 
     def attribute(self, name: str) -> Optional[str]:
         if element := self.element:
@@ -222,11 +222,11 @@ class HasExactTextCheck(Check):
 
 class HasAttributeCheck(Check):
     def __init__(self, selector: Selector, name: str) -> None:
-        def check_attribute_with_js():
+        def check_attribute_with_js() -> bool:
             element = selector.element
             if element is None:
                 return False
-            return selector._driver.execute_script(HAS_ATTRIBUTE_SCRIPT, element, name)
+            return selector.driver.execute_script(__HAS_ATTRIBUTE_SCRIPT, element, name)
 
         super().__init__(check_attribute_with_js)
         self._selector: Selector = selector
