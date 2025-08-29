@@ -13,9 +13,9 @@ from selenium.webdriver.remote.webelement import WebElement
 
 type Locator = tuple[str, str]
 
-__SELF_LOCATOR: Locator = (By.XPATH, ".")
-__CHILDREN_LOCATOR: Locator = (By.XPATH, "./*")
-__HAS_ATTRIBUTE_SCRIPT = "return arguments[0].hasAttribute(arguments[1]);"
+_SELF_LOCATOR: Locator = (By.XPATH, ".")
+_CHILDREN_LOCATOR: Locator = (By.XPATH, "./*")
+_HAS_ATTRIBUTE_SCRIPT = "return arguments[0].hasAttribute(arguments[1]);"
 
 
 @dataclass
@@ -34,7 +34,7 @@ class Selector(ABC):
     def __init__(self, driver: WebDriver, *locators: Locator) -> None:
         super().__init__()
         self.driver: WebDriver = driver
-        self.locators: tuple[Locator, ...] = locators or (__SELF_LOCATOR,)
+        self.locators: tuple[Locator, ...] = locators or (_SELF_LOCATOR,)
         self._locator: Locator = self.locators[-1]
 
     @cached_property
@@ -78,11 +78,11 @@ class Selector(ABC):
         return Selector(self.driver, *self.locators, locator)
 
     def child(self, index: int) -> "Selector":
-        locator: Locator = (By.XPATH, f"({__CHILDREN_LOCATOR[1]})[{index + 1}]")
+        locator: Locator = (By.XPATH, f"({_CHILDREN_LOCATOR[1]})[{index + 1}]")
         return Selector(self.driver, *self.locators, locator)
 
     def children(self) -> list["Selector"]:
-        num_children = len(self.select(__CHILDREN_LOCATOR).elements)
+        num_children = len(self.select(_CHILDREN_LOCATOR).elements)
         return [self.child(index) for index in range(num_children)]
 
     def click(self) -> None:
@@ -226,7 +226,7 @@ class HasAttributeCheck(Check):
             element = selector.element
             if element is None:
                 return False
-            return selector.driver.execute_script(__HAS_ATTRIBUTE_SCRIPT, element, name)
+            return selector.driver.execute_script(_HAS_ATTRIBUTE_SCRIPT, element, name)
 
         super().__init__(check_attribute_with_js)
         self._selector: Selector = selector
