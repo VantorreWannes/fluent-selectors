@@ -166,6 +166,12 @@ class Selector(ABC):
     def is_selected(self) -> "Check":
         return IsSelectedCheck(self)
 
+    @property
+    def is_stale(self) -> "Check":
+        return Check(
+            lambda: (e := self.element) is not None and e.is_displayed()
+        ).raises(StaleElementReferenceException)
+
     def has_text(self, text: str) -> "Check":
         return HasTextCheck(self, text)
 
