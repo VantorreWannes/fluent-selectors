@@ -45,13 +45,15 @@ driver.quit()
 
 The main class for selecting and interacting with elements.
 
+#### Traversal and Selection
+
 -   `select(locator: Locator) -> Selector`: Select a descendant of the current element.
 -   `child(index: int) -> Selector`: Select a child by its index.
--   `children() -> list[Selector]`: Get a list of all children.
--   `parent() -> Selector | None`: Get the parent selector.
--   `parents() -> list[Selector]`: Get a list of all parent selectors.
+-   `children() -> list[Selector]`: Get a list of all children selectors.
+-   `parent: Selector | None`: The parent selector.
+-   `parents: list[Selector]`: A list of all parent selectors.
 
-### Element Actions
+#### Element Actions
 
 -   `click()`: Clicks the element.
 -   `type_text(text: str)`: Types text into the element.
@@ -60,30 +62,32 @@ The main class for selecting and interacting with elements.
 -   `upload_file(path: Path)`: Uploads a file to a file input element.
 -   `scroll_into_view()`: Scrolls the element into view.
 
-### Element Properties
+#### Element Properties
 
--   `element() -> WebElement | None`: The Selenium WebElement.
--   `elements() -> list[WebElement]`: A list of Selenium WebElements.
--   `text() -> str | None`: The text of the element.
--   `tag_name() -> str | None`: The tag name of the element.
--   `accessible_name() -> str | None`: The accessible name of the element.
--   `aria_role() -> str | None`: The ARIA role of the element.
--   `id() -> str | None`: The ID of the element.
--   `location() -> Location | None`: The location of the element.
--   `size() -> Size | None`: The size of the element.
+-   `element: WebElement | None`: The Selenium WebElement.
+-   `elements: list[WebElement]`: A list of Selenium WebElements.
+-   `text: str | None`: The text of the element.
+-   `tag_name: str | None`: The tag name of the element.
+-   `accessible_name: str | None`: The accessible name of the element.
+-   `aria_role: str | None`: The ARIA role of the element.
+-   `id: str | None`: The ID of the element.
+-   `location: Location | None`: The location of the element.
+-   `size: Size | None`: The size of the element.
 -   `attribute(name: str) -> str | None`: The value of an attribute.
 
-### Checks
+#### Checks
 
-You can perform checks on selectors using the following properties. These checks are based on the [fluent-checks](https://github.com/VantorreWannes/fluent-checks) library.
+These methods return `Check` objects from the [fluent-checks](https://github.com/VantorreWannes/fluent-checks) library.
 
--   `is_present()`: Checks if the element is present in the DOM.
--   `is_displayed()`: Checks if the element is visible.
--   `is_enabled()`: Checks if the element is enabled.
--   `is_selected()`: Checks if the element is selected.
+-   `is_present`: Checks if the element is present in the DOM.
+-   `is_displayed`: Checks if the element is visible.
+-   `is_enabled`: Checks if the element is enabled.
+-   `is_selected`: Checks if the element is selected.
+-   `is_stale`: Checks if the element is stale.
 -   `has_text(text: str)`: Checks if the element's text contains the given text.
 -   `has_exact_text(text: str)`: Checks if the element's text exactly matches the given text.
 -   `has_attribute(name: str)`: Checks if the element has the given attribute.
+-   `has_attribute_value(name: str, value: str)`: Checks if the attribute has the given value.
 
 Example of a check:
 
