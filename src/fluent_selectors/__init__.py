@@ -6,16 +6,12 @@ from pathlib import Path
 from typing import Optional, Union
 
 from fluent_checks import Check
-from selenium.common import NoSuchElementException
+from selenium.common import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 
 type Locator = tuple[str, str]
-
-_SELF_LOCATOR: Locator = (By.XPATH, ".")
-_CHILDREN_LOCATOR: Locator = (By.XPATH, "./*")
-_HAS_ATTRIBUTE_SCRIPT = "return arguments[0].hasAttribute(arguments[1]);"
 
 
 @dataclass
@@ -31,16 +27,25 @@ class Size:
 
 
 class Selector(ABC):
+    _SELF_LOCATOR: Locator = (By.XPATH, ".")
+    _CHILDREN_LOCATOR: Locator = (By.XPATH, "./*")
+    _HAS_ATTRIBUTE_SCRIPT = "return arguments[0].hasAttribute(arguments[1]);"
+    _SCROLL_INTO_VIEW_SCRIPT = "arguments[0].scrollIntoView(true);"
+
     def __init__(self, driver: WebDriver, *locators: Locator) -> None:
         super().__init__()
         self.driver: WebDriver = driver
-        self.locators: tuple[Locator, ...] = locators or (_SELF_LOCATOR,)
-        self._locator: Locator = self.locators[-1]
+        self._locators: tuple[Locator, ...] = locators or (Selector._SELF_LOCATOR,)
+        self._locator: Locator = self._locators[-1]
+
+    @cached_property
+    def locators(self) -> tuple[Locator, ...]:
+        return self._locators
 
     @cached_property
     def parent(self) -> Optional["Selector"]:
-        if len(self.locators) > 1:
-            return Selector(self.driver, *self.locators[:-1])
+        if len(self._locators) > 1:
+            return Selector(self.driver, *self._locators[:-1])
 
     @cached_property
     def parents(self) -> list["Selector"]:
@@ -48,7 +53,7 @@ class Selector(ABC):
             return [parent, *parent.parents]
         return []
 
-    @property
+    @cached_property
     def _context(self) -> Union[WebDriver, WebElement, None]:
         if self.parent:
             return self.parent.element
@@ -75,14 +80,14 @@ class Selector(ABC):
             return []
 
     def select(self, locator: Locator) -> "Selector":
-        return Selector(self.driver, *self.locators, locator)
+        return Selector(self.driver, *self._locators, locator)
 
     def child(self, index: int) -> "Selector":
-        locator: Locator = (By.XPATH, f"({_CHILDREN_LOCATOR[1]})[{index + 1}]")
-        return Selector(self.driver, *self.locators, locator)
+        locator: Locator = (By.XPATH, f"({Selector._CHILDREN_LOCATOR[1]})[{index + 1}]")
+        return Selector(self.driver, *self._locators, locator)
 
     def children(self) -> list["Selector"]:
-        num_children = len(self.select(_CHILDREN_LOCATOR).elements)
+        num_children = len(self.select(Selector._CHILDREN_LOCATOR).elements)
         return [self.child(index) for index in range(num_children)]
 
     def click(self) -> None:
@@ -143,39 +148,43 @@ class Selector(ABC):
 
     def scroll_into_view(self) -> None:
         if element := self.element:
-            self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
+            self.driver.execute_script(Selector._SCROLL_INTO_VIEW_SCRIPT, element)
 
     def attribute(self, name: str) -> Optional[str]:
         if element := self.element:
             return element.get_attribute(name)
 
     @property
-    def is_present(self) -> "IsPresentCheck":
-        return IsPresentCheck(self)
+    def is_present(self) -> "Check":
+        return (~self.is_stale) & IsPresentCheck(self)
 
     @property
-    def is_displayed(self) -> "IsDisplayedCheck":
-        return IsDisplayedCheck(self)
+    def is_displayed(self) -> "Check":
+        return (~self.is_stale) & IsDisplayedCheck(self)
 
     @property
-    def is_enabled(self) -> "IsEnabledCheck":
-        return IsEnabledCheck(self)
+    def is_enabled(self) -> "Check":
+        return (~self.is_stale) & IsEnabledCheck(self)
 
     @property
-    def is_selected(self) -> "IsSelectedCheck":
-        return IsSelectedCheck(self)
+    def is_selected(self) -> "Check":
+        return (~self.is_stale) & IsSelectedCheck(self)
 
-    def has_text(self, text: str) -> "HasTextCheck":
-        return HasTextCheck(self, text)
+    @property
+    def is_stale(self) -> "Check":
+        return IsStaleCheck(self)
 
-    def has_exact_text(self, text: str) -> "HasExactTextCheck":
-        return HasExactTextCheck(self, text)
+    def has_text(self, text: str) -> "Check":
+        return (~self.is_stale) & HasTextCheck(self, text)
 
-    def has_attribute(self, name: str) -> "HasAttributeCheck":
-        return HasAttributeCheck(self, name)
+    def has_exact_text(self, text: str) -> "Check":
+        return (~self.is_stale) & HasExactTextCheck(self, text)
 
-    def has_attribute_value(self, name: str, value: str) -> "HasAttributeValueCheck":
-        return HasAttributeValueCheck(self, name, value)
+    def has_attribute(self, name: str) -> "Check":
+        return (~self.is_stale) & HasAttributeCheck(self, name)
+
+    def has_attribute_value(self, name: str, value: str) -> "Check":
+        return (~self.is_stale) & HasAttributeValueCheck(self, name, value)
 
 
 class IsPresentCheck(Check):
@@ -186,36 +195,52 @@ class IsPresentCheck(Check):
 
 class IsDisplayedCheck(Check):
     def __init__(self, selector: Selector) -> None:
-        super().__init__(
-            lambda: (e := selector.element) is not None and e.is_displayed()
-        )
+        def condition() -> bool:
+            e = selector.element
+            return e is not None and e.is_displayed()
+
+        super().__init__(condition)
         self._selector: Selector = selector
 
 
 class IsEnabledCheck(Check):
     def __init__(self, selector: Selector) -> None:
-        super().__init__(lambda: (e := selector.element) is not None and e.is_enabled())
+        def condition() -> bool:
+            e = selector.element
+            return e is not None and e.is_enabled()
+
+        super().__init__(condition)
         self._selector: Selector = selector
 
 
 class IsSelectedCheck(Check):
     def __init__(self, selector: Selector) -> None:
-        super().__init__(
-            lambda: (e := selector.element) is not None and e.is_selected()
-        )
+        def condition() -> bool:
+            e = selector.element
+            return e is not None and e.is_selected()
+
+        super().__init__(condition)
         self._selector: Selector = selector
 
 
 class HasTextCheck(Check):
     def __init__(self, selector: Selector, text: str) -> None:
-        super().__init__(lambda: (e := selector.element) is not None and text in e.text)
+        def condition() -> bool:
+            e = selector.element
+            return e is not None and text in e.text
+
+        super().__init__(condition)
         self._selector: Selector = selector
         self._text: str = text
 
 
 class HasExactTextCheck(Check):
     def __init__(self, selector: Selector, text: str) -> None:
-        super().__init__(lambda: (e := selector.element) is not None and text == e.text)
+        def condition() -> bool:
+            e = selector.element
+            return e is not None and text == e.text
+
+        super().__init__(condition)
         self._selector: Selector = selector
         self._text: str = text
 
@@ -226,7 +251,9 @@ class HasAttributeCheck(Check):
             element = selector.element
             if element is None:
                 return False
-            return selector.driver.execute_script(_HAS_ATTRIBUTE_SCRIPT, element, name)
+            return selector.driver.execute_script(
+                Selector._HAS_ATTRIBUTE_SCRIPT, element, name
+            )
 
         super().__init__(check_attribute_with_js)
         self._selector: Selector = selector
@@ -235,9 +262,17 @@ class HasAttributeCheck(Check):
 
 class HasAttributeValueCheck(Check):
     def __init__(self, selector: Selector, name: str, value: str) -> None:
-        super().__init__(
-            lambda: (e := selector.element) is not None
-            and value == e.get_attribute(name)
-        )
+        def condition() -> bool:
+            e = selector.element
+            return e is not None and value == e.get_attribute(name)
+
+        super().__init__(condition)
         self._selector: Selector = selector
         self._name = name
+
+
+class IsStaleCheck(Check):
+    def __init__(self, selector: Selector) -> None:
+        super().__init__(
+            IsDisplayedCheck(selector).raises(StaleElementReferenceException).check
+        )
