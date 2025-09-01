@@ -1,12 +1,12 @@
 [project]
 name = "fluent-selectors"
-version = "0.1.7"
+version = "0.1.8"
 description = "A Python library for creating a readable, fluent API for Selenium browser automation"
 readme = "README.md"
 authors = [{ name = "vantorrewannes", email = "vantorrewannes@gmail.com" }]
 requires-python = ">=3.12"
 dependencies = [
- "fluent-checks>=0.2.1",
+ "fluent-checks>=0.3.0",
  "selenium>=4.35.0",
 ]
 classifiers = [
