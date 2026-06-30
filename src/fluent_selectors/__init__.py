@@ -3,7 +3,7 @@ from abc import ABC
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Self, Union
 
 from fluent_checks import Check
 from selenium.common import NoSuchElementException, StaleElementReferenceException
@@ -17,45 +17,47 @@ class Locator:
     by: str
     value: str
 
+    @classmethod
+    def id(cls, locator: str) -> Self:
+        return cls(By.ID, locator)
 
-class IdLocator(Locator):
-    def __init__(self, value: str) -> None:
-        super().__init__(By.ID, value)
+    @classmethod
+    def xpath(cls, locator: str) -> Self:
+        return cls(By.XPATH, locator)
 
+    @classmethod
+    def css(cls, locator: str) -> Self:
+        return cls(By.CSS_SELECTOR, locator)
 
-class XPathLocator(Locator):
-    def __init__(self, value: str) -> None:
-        super().__init__(By.XPATH, value)
+    @classmethod
+    def name(cls, locator: str) -> Self:
+        return cls(By.NAME, locator)
 
+    @classmethod
+    def tag(cls, locator: str) -> Self:
+        return cls(By.TAG_NAME, locator)
 
-class CssSelectorLocator(Locator):
-    def __init__(self, value: str) -> None:
-        super().__init__(By.CSS_SELECTOR, value)
+    @classmethod
+    def class_name(cls, locator: str) -> Self:
+        return cls(By.CLASS_NAME, locator)
 
+    @classmethod
+    def link_text(cls, locator: str) -> Self:
+        return cls(By.LINK_TEXT, locator)
 
-class TagNameLocator(Locator):
-    def __init__(self, value: str) -> None:
-        super().__init__(By.TAG_NAME, value)
-
-
-class ClassNameLocator(Locator):
-    def __init__(self, value: str) -> None:
-        super().__init__(By.CLASS_NAME, value)
-
-
-class NameLocator(Locator):
-    def __init__(self, value: str) -> None:
-        super().__init__(By.NAME, value)
-
-
-class LinkTextLocator(Locator):
-    def __init__(self, value: str) -> None:
-        super().__init__(By.LINK_TEXT, value)
+    @classmethod
+    def partial_link_text(cls, locator: str) -> Self:
+        return cls(By.PARTIAL_LINK_TEXT, locator)
 
 
-class PartialLinkTextLocator(Locator):
-    def __init__(self, value: str) -> None:
-        super().__init__(By.PARTIAL_LINK_TEXT, value)
+IdLocator = Locator.id
+XPathLocator = Locator.xpath
+CssLocator = Locator.css
+NameLocator = Locator.name
+TagLocator = Locator.tag
+ClassNameLocator = Locator.class_name
+LinkTextLocator = Locator.link_text
+PartialLinkTextLocator = Locator.partial_link_text
 
 
 @dataclass

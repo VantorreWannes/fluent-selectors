@@ -2,18 +2,18 @@ import pytest
 from selenium.webdriver.remote.webdriver import WebDriver
 
 from fluent_selectors import (
-    CssSelectorLocator,
+    CssLocator,
     IdLocator,
     Selector,
-    TagNameLocator,
+    TagLocator,
 )
 
 
 @pytest.mark.parametrize(
     "locator, expected",
     [
-        (TagNameLocator("h1"), True),
-        (TagNameLocator("h2"), False),
+        (TagLocator("h1"), True),
+        (TagLocator("h2"), False),
     ],
 )
 def test_is_present(driver: WebDriver, locator, expected):
@@ -24,8 +24,8 @@ def test_is_present(driver: WebDriver, locator, expected):
 @pytest.mark.parametrize(
     "locator, expected",
     [
-        (TagNameLocator("h1"), True),
-        (CssSelectorLocator("#div-2 p"), False),
+        (TagLocator("h1"), True),
+        (CssLocator("#div-2 p"), False),
     ],
 )
 def test_is_displayed(driver: WebDriver, locator, expected):
@@ -60,8 +60,8 @@ def test_is_selected(driver: WebDriver, locator, expected):
 @pytest.mark.parametrize(
     "locator, text, expected",
     [
-        (TagNameLocator("h1"), "Hello", True),
-        (TagNameLocator("h1"), "H2", False),
+        (TagLocator("h1"), "Hello", True),
+        (TagLocator("h1"), "H2", False),
     ],
 )
 def test_has_text(driver: WebDriver, locator, text, expected):
@@ -72,8 +72,8 @@ def test_has_text(driver: WebDriver, locator, text, expected):
 @pytest.mark.parametrize(
     "locator, text, expected",
     [
-        (TagNameLocator("h1"), "Hello, World!", True),
-        (TagNameLocator("h1"), "An H1", False),
+        (TagLocator("h1"), "Hello, World!", True),
+        (TagLocator("h1"), "An H1", False),
     ],
 )
 def test_has_exact_text(driver: WebDriver, locator, text, expected):
@@ -85,7 +85,7 @@ def test_has_exact_text(driver: WebDriver, locator, text, expected):
     "locator, attribute, expected",
     [
         (IdLocator("div-1"), "id", True),
-        (TagNameLocator("h1"), "class", False),
+        (TagLocator("h1"), "class", False),
     ],
 )
 def test_has_attribute(driver: WebDriver, locator, attribute, expected):
@@ -95,7 +95,7 @@ def test_has_attribute(driver: WebDriver, locator, attribute, expected):
 
 def test_parent(driver: WebDriver):
     child_selector = Selector(
-        driver, TagNameLocator("body"), IdLocator("div-1"), TagNameLocator("h1")
+        driver, TagLocator("body"), IdLocator("div-1"), TagLocator("h1")
     )
     parent_selector = child_selector.parent
     assert parent_selector is not None
@@ -105,17 +105,17 @@ def test_parent(driver: WebDriver):
 
 def test_parents(driver: WebDriver):
     child_selector = Selector(
-        driver, TagNameLocator("body"), IdLocator("div-1"), TagNameLocator("h1")
+        driver, TagLocator("body"), IdLocator("div-1"), TagLocator("h1")
     )
     parents = child_selector.parents
     assert len(parents) == 2
     assert parents[0]._locator == IdLocator("div-1")
-    assert parents[1]._locator == TagNameLocator("body")
+    assert parents[1]._locator == TagLocator("body")
 
 
 def test_select(driver: WebDriver):
     selector = Selector(driver, IdLocator("div-1"))
-    h1_selector = selector.select(TagNameLocator("h1"))
+    h1_selector = selector.select(TagLocator("h1"))
     assert h1_selector.element is not None
     assert h1_selector.element.text == "Hello, World!"
 
