@@ -16,8 +16,7 @@ Here's a simple example of how to use `fluent-selectors`:
 
 ```python
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from fluent_selectors import Selector
+from fluent_selectors import ClassNameLocator, IdLocator, NameLocator, Selector
 
 # Initialize the WebDriver
 driver = webdriver.Chrome()
@@ -27,14 +26,14 @@ driver.get("http://www.python.org")
 s = Selector(driver)
 
 # Select an element and interact with it
-search_bar = s.select((By.NAME, "q"))
+search_bar = s.select(NameLocator("q"))
 search_bar.set_text("pycon")
 
-go_button = s.select((By.ID, "submit"))
+go_button = s.select(IdLocator("submit"))
 go_button.click()
 
 # Perform checks
-s.select((By.CLASS_NAME, "list-recent-events")).is_displayed.is_true()
+s.select(ClassNameLocator("list-recent-events")).is_displayed.is_true()
 
 driver.quit()
 ```
@@ -92,8 +91,8 @@ These methods return `Check` objects from the [fluent-checks](https://github.com
 Example of a check:
 
 ```python
-s.select((By.ID, "my-element")).is_displayed.is_true()
-s.select((By.ID, "my-element")).has_text("Hello").is_true()
+s.select(IdLocator("my-element")).is_displayed.is_true()
+s.select(IdLocator("my-element")).has_text("Hello").is_true()
 ```
 
 ## License

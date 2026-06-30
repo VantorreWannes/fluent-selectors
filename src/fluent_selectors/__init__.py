@@ -11,7 +11,51 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 
-type Locator = tuple[str, str]
+
+@dataclass
+class Locator:
+    by: str
+    value: str
+
+
+class IdLocator(Locator):
+    def __init__(self, value: str) -> None:
+        super().__init__(By.ID, value)
+
+
+class XPathLocator(Locator):
+    def __init__(self, value: str) -> None:
+        super().__init__(By.XPATH, value)
+
+
+class CssSelectorLocator(Locator):
+    def __init__(self, value: str) -> None:
+        super().__init__(By.CSS_SELECTOR, value)
+
+
+class TagNameLocator(Locator):
+    def __init__(self, value: str) -> None:
+        super().__init__(By.TAG_NAME, value)
+
+
+class ClassNameLocator(Locator):
+    def __init__(self, value: str) -> None:
+        super().__init__(By.CLASS_NAME, value)
+
+
+class NameLocator(Locator):
+    def __init__(self, value: str) -> None:
+        super().__init__(By.NAME, value)
+
+
+class LinkTextLocator(Locator):
+    def __init__(self, value: str) -> None:
+        super().__init__(By.LINK_TEXT, value)
+
+
+class PartialLinkTextLocator(Locator):
+    def __init__(self, value: str) -> None:
+        super().__init__(By.PARTIAL_LINK_TEXT, value)
 
 
 @dataclass
@@ -27,8 +71,8 @@ class Size:
 
 
 class Selector(ABC):
-    _SELF_LOCATOR: Locator = (By.XPATH, ".")
-    _CHILDREN_LOCATOR: Locator = (By.XPATH, "./*")
+    _SELF_LOCATOR: Locator = XPathLocator(".")
+    _CHILDREN_LOCATOR: Locator = XPathLocator("./*")
     _HAS_ATTRIBUTE_SCRIPT = "return arguments[0].hasAttribute(arguments[1]);"
     _SCROLL_INTO_VIEW_SCRIPT = "arguments[0].scrollIntoView(true);"
 
@@ -64,7 +108,7 @@ class Selector(ABC):
         try:
             context = self._context
             if context:
-                return context.find_element(*self._locator)
+                return context.find_element(self._locator.by, self._locator.value)
             return None
         except NoSuchElementException:
             return None
@@ -74,7 +118,7 @@ class Selector(ABC):
         try:
             context = self._context
             if context:
-                return context.find_elements(*self._locator)
+                return context.find_elements(self._locator.by, self._locator.value)
             return []
         except NoSuchElementException:
             return []
@@ -83,7 +127,7 @@ class Selector(ABC):
         return Selector(self.driver, *self._locators, locator)
 
     def child(self, index: int) -> "Selector":
-        locator: Locator = (By.XPATH, f"({Selector._CHILDREN_LOCATOR[1]})[{index + 1}]")
+        locator = XPathLocator(f"({Selector._CHILDREN_LOCATOR.value})[{index + 1}]")
         return Selector(self.driver, *self._locators, locator)
 
     def children(self) -> list["Selector"]:

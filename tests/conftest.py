@@ -30,6 +30,7 @@ def test_page_url(httpserver: HTTPServer):
     )
     return httpserver.url_for("/")
 
+
 @pytest.fixture
 def driver(chrome_driver: WebDriver, test_page_url: str) -> WebDriver:
     chrome_driver.get(test_page_url)
